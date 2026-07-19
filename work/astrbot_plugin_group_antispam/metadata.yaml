@@ -1,0 +1,8 @@
+name: astrbot_plugin_group_antispam
+display_name: QQ 群防刷屏
+desc: 按 QQ 用户 ID 检测群内短时间高频发言，并按可配置规则自动禁言与升级处罚。
+short_desc: 阈值、窗口、禁言时长、升级规则和白名单均可在配置页调整。
+version: 0.1.0
+author: Local
+repo: https://github.com/Ran2139270/bot_
+astrbot_version: ">=4.26,<5"

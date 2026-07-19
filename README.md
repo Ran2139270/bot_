@@ -5,6 +5,7 @@
 - `work/astrbot_plugin_group_games`：群互动游戏与真心话大冒险。
 - `work/astrbot_plugin_agent_mail`：管理员专用的 Agent Mail 邮箱工具。
 - `work/astrbot_plugin_group_mute`：基于 OneBot/NapCat 的群成员禁言工具。
+- `work/astrbot_plugin_group_antispam`：按 QQ 用户 ID 自动检测高频刷屏并执行可配置禁言。
 
 ## 安装
 

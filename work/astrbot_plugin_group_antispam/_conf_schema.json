@@ -1,0 +1,68 @@
+{
+  "enabled": {
+    "description": "启用群防刷屏检测",
+    "type": "bool",
+    "default": true
+  },
+  "window_seconds": {
+    "description": "统计时间窗口（秒）",
+    "hint": "在此时间内累计消息数达到阈值即触发处罚。",
+    "type": "int",
+    "default": 10
+  },
+  "message_threshold": {
+    "description": "刷屏消息阈值",
+    "hint": "同一 QQ 在统计窗口内发送达到此数量的消息即视为刷屏。",
+    "type": "int",
+    "default": 6
+  },
+  "mute_minutes": {
+    "description": "首次禁言时长（分钟）",
+    "type": "int",
+    "default": 5
+  },
+  "max_mute_minutes": {
+    "description": "单次禁言最长时长（分钟）",
+    "type": "int",
+    "default": 1440
+  },
+  "action_cooldown_seconds": {
+    "description": "处罚后冷却时间（秒）",
+    "hint": "同一用户处罚后，冷却期内不再次触发；避免重复调用 OneBot 禁言。",
+    "type": "int",
+    "default": 30
+  },
+  "escalate_penalty": {
+    "description": "重复刷屏时升级处罚",
+    "type": "bool",
+    "default": true
+  },
+  "escalation_multiplier": {
+    "description": "每次重复处罚的时长倍率",
+    "hint": "例如 2 表示 5 分钟、10 分钟、20 分钟递增，受最长禁言时长限制。",
+    "type": "int",
+    "default": 2
+  },
+  "escalation_window_minutes": {
+    "description": "重复违规统计时长（分钟）",
+    "type": "int",
+    "default": 60
+  },
+  "whitelist_qqs": {
+    "description": "白名单 QQ 号",
+    "hint": "白名单用户永不触发本插件处罚。",
+    "type": "list",
+    "default": []
+  },
+  "exempt_group_admins": {
+    "description": "豁免群主和群管理员",
+    "type": "bool",
+    "default": true
+  },
+  "notice_template": {
+    "description": "处罚提示文案",
+    "hint": "支持 {name}、{user_id}、{minutes} 占位符。留空使用默认文案。",
+    "type": "text",
+    "default": "检测到 {name}（{user_id}）短时间内发送过多消息，已禁言 {minutes} 分钟。"
+  }
+}
