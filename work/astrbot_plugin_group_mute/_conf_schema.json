@@ -1,0 +1,23 @@
+{
+  "admin_qqs": {
+    "description": "额外允许执行群管命令的 QQ 号",
+    "type": "list",
+    "hint": "留空时仅允许当前群的群主和管理员；可填写需要额外授权的 QQ 号。",
+    "default": []
+  },
+  "allow_group_admins": {
+    "description": "允许 QQ 群主和管理员执行",
+    "type": "bool",
+    "default": true
+  },
+  "default_duration_minutes": {
+    "description": "未填写时的默认禁言分钟数",
+    "type": "int",
+    "default": 10
+  },
+  "max_duration_minutes": {
+    "description": "单次禁言最大分钟数（0 表示不限制）",
+    "type": "int",
+    "default": 1440
+  }
+}

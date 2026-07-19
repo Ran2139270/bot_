@@ -1,0 +1,8 @@
+name: astrbot_plugin_group_mute
+display_name: QQ 群禁言管理
+desc: 为 AstrBot 的 aiocqhttp/NapCat 平台提供安全的群成员禁言与解除禁言命令。
+short_desc: 群管理员可使用“禁言 @成员 10分钟”和“解除禁言 @成员”。
+version: 0.1.0
+author: Local
+repo: local
+astrbot_version: ">=4.26,<5"

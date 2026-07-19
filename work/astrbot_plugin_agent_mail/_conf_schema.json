@@ -1,0 +1,18 @@
+{
+  "allow_group_use": {
+    "description": "允许管理员在群聊中使用邮箱命令",
+    "type": "bool",
+    "hint": "默认关闭，避免邮件主题和正文泄露给群成员。",
+    "default": false
+  },
+  "list_limit": {
+    "description": "单次列出的邮件数量",
+    "type": "int",
+    "default": 10
+  },
+  "max_read_chars": {
+    "description": "单次展示的邮件正文最大字符数",
+    "type": "int",
+    "default": 3000
+  }
+}

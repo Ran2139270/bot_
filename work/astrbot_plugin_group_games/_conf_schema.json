@@ -1,0 +1,20 @@
+{
+  "roulette_chambers": {
+    "description": "俄罗斯转盘弹巢数量",
+    "type": "int",
+    "hint": "默认 6；数值越大，单次触发概率越低。",
+    "default": 6
+  },
+  "number_bomb_max_range": {
+    "description": "数字炸弹的最大允许区间",
+    "type": "int",
+    "hint": "创建游戏时的上限不能超过此数值。",
+    "default": 1000
+  },
+  "dice_sides": {
+    "description": "骰子面数",
+    "type": "int",
+    "hint": "默认使用六面骰，支持 2 到 100。",
+    "default": 6
+  }
+}

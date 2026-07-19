@@ -1,0 +1,8 @@
+name: astrbot_plugin_group_games
+display_name: QQ 群小游戏
+desc: 为 AstrBot QQ 群提供俄罗斯转盘、数字炸弹、骰子比大小、多人猜拳和真心话大冒险。
+short_desc: 无需 @，仅真心话大冒险按需调用 LLM 的群聊小游戏。
+version: 0.3.2
+author: Local
+repo: local
+astrbot_version: ">=4.26,<5"
