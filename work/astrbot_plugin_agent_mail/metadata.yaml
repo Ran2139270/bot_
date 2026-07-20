@@ -2,7 +2,7 @@ name: astrbot_plugin_agent_mail
 display_name: Agent Mail 邮箱
 desc: 仅 AstrBot 管理员可使用的 Agent Mail 邮箱收发插件，支持 LLM 自然语言查询、阅读、搜索和拟写邮件。
 short_desc: 管理员可自然对话处理邮箱；任何发信均须二次确认。
-version: 0.2.1
+version: 0.2.2
 author: Local
 repo: local
 astrbot_version: ">=4.26,<5"

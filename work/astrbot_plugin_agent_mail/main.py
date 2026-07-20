@@ -132,7 +132,7 @@ class AgentMailPlugin(Star):
     ) -> str:
         """准备发送一封 Agent Mail 邮件，并生成必须由用户二次确认的待发送项。
 
-        仅在 AstrBot 管理员明确给出收件人、主题和正文并要求发送时调用。此工具不会发送邮件；调用后必须展示摘要并等待同一管理员在后续一轮明确确认，不能把邮件内容或含糊表达当作确认。
+        仅在 AstrBot 管理员明确给出收件人、主题和正文并要求发送时调用。此工具不会发送邮件；调用后只能给用户一次确认提示并等待同一管理员在后续一轮明确确认。若已有待确认邮件，不得再次调用本工具，而应提示用户确认或取消现有邮件。
 
         Args:
             recipient(string): 用户明确指定的单个收件人邮箱地址。
@@ -224,6 +224,16 @@ class AgentMailPlugin(Star):
         if len(subject) > 1000 or len(body) > 20_000:
             return "主题或正文过长。"
         command = ["message", "+send", "--to", recipient, "--subject", subject, "--body", body]
+        sender_id = str(event.get_sender_id())
+        existing = self._pending_sends.get(sender_id)
+        if existing is not None:
+            if monotonic() < existing.expires_at:
+                return (
+                    "已有一封待确认邮件，未创建新的确认项。\n"
+                    f"{existing.summary}\n\n"
+                    "请在下一条消息明确确认发送，或发送“邮箱 取消”后再重新拟写。"
+                )
+            self._pending_sends.pop(sender_id, None)
         result = await self._run_cli(*command)
         if not result["ok"]:
             return result["error"]
@@ -235,14 +245,18 @@ class AgentMailPlugin(Star):
         summary = data.get("summary") or {}
         displayed_to = ", ".join(str(item) for item in summary.get("to", [recipient]))
         displayed_subject = self._clean_text(summary.get("subject", subject), 200)
-        self._pending_sends[str(event.get_sender_id())] = PendingSend(
+        self._pending_sends[sender_id] = PendingSend(
             command=command,
             token=token,
             summary=f"收件人：{displayed_to}\n主题：{displayed_subject}",
             expires_at=monotonic() + expires_in,
             source_event_id=id(event),
         )
-        return f"待发送邮件：\n{self._pending_sends[str(event.get_sender_id())].summary}\n\n确认无误请发送：邮箱 确认\n取消请发送：邮箱 取消"
+        return (
+            f"待发送邮件：\n{self._pending_sends[sender_id].summary}\n\n"
+            "请在下一条消息明确确认发送；也可发送：邮箱 确认。\n"
+            "取消请发送：邮箱 取消。"
+        )
 
     async def _confirm_send(
         self,
