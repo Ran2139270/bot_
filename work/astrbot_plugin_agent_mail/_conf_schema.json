@@ -1,18 +1,12 @@
 {
-  "allow_group_use": {
-    "description": "允许管理员在群聊中使用邮箱命令",
-    "type": "bool",
-    "hint": "默认关闭，避免邮件主题和正文泄露给群成员。",
-    "default": false
-  },
-  "list_limit": {
-    "description": "单次列出的邮件数量",
-    "type": "int",
-    "default": 10
-  },
-  "max_read_chars": {
-    "description": "单次展示的邮件正文最大字符数",
-    "type": "int",
-    "default": 3000
-  }
+  "allow_group_use": {"description": "Allow administrators to use mail in groups", "type": "bool", "default": false},
+  "list_limit": {"description": "Inbox list limit", "type": "int", "default": 10},
+  "max_read_chars": {"description": "Maximum displayed email body characters", "type": "int", "default": 3000},
+  "auto_notify_qq_mail_senders": {"description": "Notify QQ-mail senders by private QQ message", "hint": "Only numeric@qq.com senders that are already QQ friends are notified. Existing unread mail is ignored on startup.", "type": "bool", "default": true},
+  "mail_poll_seconds": {"description": "Unread inbox polling interval in seconds", "type": "int", "default": 60},
+  "qq_mail_notice_template": {"description": "QQ private-message notification template", "hint": "Supports {subject}.", "type": "text", "default": "Your email was received: {subject}"},
+  "trusted_qq_id": {"description": "Trusted QQ mailbox owner ID", "type": "string", "default": "2134313957"},
+  "trusted_auto_reply_enabled": {"description": "Auto-reply to new mail from the trusted QQ mailbox", "type": "bool", "default": true},
+  "trusted_auto_reply_body": {"description": "Trusted mailbox automatic reply body", "type": "text", "default": "Your email has been received."},
+  "trusted_send_skip_confirmation": {"description": "Skip confirmation only for trusted_qq_id@qq.com", "type": "bool", "default": true}
 }

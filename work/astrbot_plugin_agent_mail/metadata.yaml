@@ -1,8 +1,8 @@
 name: astrbot_plugin_agent_mail
 display_name: Agent Mail 邮箱
-desc: 仅 AstrBot 管理员可使用的 Agent Mail 邮箱收发插件，支持 LLM 自然语言查询、阅读、搜索和拟写邮件。
-short_desc: 管理员可自然对话处理邮箱；任何发信均须二次确认。
-version: 0.2.2
+desc: 仅 AstrBot 管理员可使用的 Agent Mail 命令式邮箱插件，支持 QQ 邮箱来信私聊通知与可信邮箱自动回执。
+short_desc: 管理员命令收发邮件；QQ 邮箱新邮件可主动私聊通知。
+version: 0.3.0
 author: Local
 repo: local
 astrbot_version: ">=4.26,<5"
