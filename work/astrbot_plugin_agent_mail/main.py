@@ -213,18 +213,20 @@ class AgentMailPlugin(Star):
             return
         subject = self._clean_text(item.get("subject"), 120) or "（无主题）"
         if await self._is_qq_friend(qq_id):
-            notice = str(
+            read_result = await self._run_cli("message", "+read", "--id", message_id)
+            body = ""
+            if read_result["ok"]:
+                body = self._clean_text(read_result["data"].get("body"), 600)
+            reply = str(
                 self.config.get(
                     "qq_mail_notice_template",
-                    "已收到你的邮件，主题：{subject}。如需补充说明，可直接在这里发送消息。",
+                    "我已阅读你的邮件。\n主题：{subject}\n内容：{body}",
                 )
-            ).format(subject=subject[:80])
+            ).format(subject=subject[:80], body=body or "（正文为空或暂时无法读取）")
             try:
-                await self._call_bot_action("send_private_msg", user_id=int(qq_id), message=notice[:500])
+                await self._call_bot_action("send_private_msg", user_id=int(qq_id), message=reply[:1200])
             except Exception:
-                logger.exception("Agent Mail QQ notification failed: qq=%s message=%s", qq_id, message_id)
-        if self._is_trusted_sender(sender_email) and self.config.get("trusted_auto_reply_enabled", True):
-            await self._reply_to_trusted_sender(message_id)
+                logger.exception("Agent Mail QQ reply failed: qq=%s message=%s", qq_id, message_id)
 
     async def _is_qq_friend(self, qq_id: str) -> bool:
         try:
@@ -239,30 +241,6 @@ class AgentMailPlugin(Star):
             for item in friends
             if isinstance(item, dict)
         )
-
-    async def _reply_to_trusted_sender(self, message_id: str) -> None:
-        body = self._clean_text(
-            self.config.get("trusted_auto_reply_body", "已收到你的邮件。"), 2000
-        )
-        if not body:
-            return
-        command = ["message", "+reply", "--id", message_id, "--body", body]
-        result = await self._run_cli(*command)
-        if not result["ok"]:
-            logger.warning("trusted mail auto-reply preparation failed: %s", result["error"])
-            return
-        data = result["data"]
-        token = str(data.get("confirmation_token", ""))
-        if not data.get("confirmation_required") or not token:
-            logger.warning("trusted mail auto-reply did not return a confirmation token")
-            return
-        result = await self._run_cli(*command, "--confirmation-token", token)
-        if not result["ok"]:
-            logger.warning("trusted mail auto-reply failed: %s", result["error"])
-
-    def _is_trusted_sender(self, email: str) -> bool:
-        qq_id = str(self.config.get("trusted_qq_id", "2134313957")).strip()
-        return email.lower() == f"{qq_id}@qq.com".lower()
 
     @staticmethod
     def _sender_email(sender: object) -> str:
@@ -333,8 +311,6 @@ class AgentMailPlugin(Star):
             return "主题或正文过长。"
         command = ["message", "+send", "--to", recipient, "--subject", subject, "--body", body]
         sender_id = str(event.get_sender_id())
-        if self._is_trusted_sender(recipient) and self.config.get("trusted_send_skip_confirmation", True):
-            return await self._send_trusted_mail(command)
         result = await self._run_cli(*command)
         if not result["ok"]:
             return result["error"]
@@ -354,17 +330,6 @@ class AgentMailPlugin(Star):
             source_event_id=id(event),
         )
         return f"待发送邮件：\n{self._pending_sends[sender_id].summary}\n\n确认无误请发送：邮箱 确认\n取消请发送：邮箱 取消"
-
-    async def _send_trusted_mail(self, command: list[str]) -> str:
-        result = await self._run_cli(*command)
-        if not result["ok"]:
-            return result["error"]
-        data = result["data"]
-        token = str(data.get("confirmation_token", ""))
-        if not data.get("confirmation_required") or not token:
-            return "邮件确认信息不完整，未发送。"
-        result = await self._run_cli(*command, "--confirmation-token", token)
-        return "邮件已提交发送。" if result["ok"] else result["error"]
 
     async def _confirm_send(
         self,
