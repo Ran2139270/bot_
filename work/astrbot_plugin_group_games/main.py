@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import asyncio
 import random
+import re
 from dataclasses import dataclass, field
 
 from astrbot.api import AstrBotConfig, logger
@@ -49,10 +50,6 @@ class GroupGamesPlugin(Star):
         self._lock = asyncio.Lock()
 
     @filter.event_message_type(filter.EventMessageType.GROUP_MESSAGE)
-    @filter.regex(
-        r"^(?:/开始(?:\s+.*)?|/break|/?shot|/[+-]?\d+|/投|/cut|"
-        r"/真心话|/大冒险|/刷新|/小游戏帮助)$"
-    )
     async def handle_game_command(self, event: AstrMessageEvent):
         """群小游戏入口：无需 @机器人，也不触发普通聊天 LLM。
 
@@ -62,13 +59,15 @@ class GroupGamesPlugin(Star):
         真心话大冒险发生平局时，仅平局者按提示重抽；唯一失败者可选择
         /真心话 或 /大冒险，并可 /刷新两次。仅最终生成真心话或大冒险题目时调用 LLM。
         """
-        event.should_call_llm(False)
-        event.stop_event()
         group_id = str(event.get_group_id() or "")
         if not group_id:
             return
 
         text = event.get_message_str().strip()
+        if not self._is_game_command(text):
+            return
+        event.should_call_llm(False)
+        event.stop_event()
         operator_id = str(event.get_sender_id())
         operator_name = event.get_sender_name() or operator_id
 
@@ -88,6 +87,14 @@ class GroupGamesPlugin(Star):
                     text,
                 )
         yield event.plain_result(reply)
+
+    @staticmethod
+    def _is_game_command(text: str) -> bool:
+        if text in {"/break", "shot", "/shot", "/投", "/cut", "/真心话", "/大冒险", "/刷新", "/小游戏帮助"}:
+            return True
+        if text.startswith("/") and text[1:].lstrip("+-").isdigit():
+            return True
+        return bool(re.match(r"^/开始(?:\s|$)", text))
 
     def _handle(
         self,

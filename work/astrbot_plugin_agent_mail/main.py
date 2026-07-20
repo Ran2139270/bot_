@@ -26,6 +26,7 @@ class PendingSend:
     token: str
     summary: str
     expires_at: float
+    source_event_id: int
 
 
 class AgentMailPlugin(Star):
@@ -152,7 +153,7 @@ class AgentMailPlugin(Star):
         Args:
         """
         error = self._llm_access_error(event)
-        return error or await self._confirm_send(event)
+        return error or await self._confirm_send(event, require_explicit_confirmation=True)
 
     @filter.llm_tool(name="agent_mail_cancel_send")
     async def llm_cancel_send(self, event: AstrMessageEvent) -> str:
@@ -239,14 +240,26 @@ class AgentMailPlugin(Star):
             token=token,
             summary=f"收件人：{displayed_to}\n主题：{displayed_subject}",
             expires_at=monotonic() + expires_in,
+            source_event_id=id(event),
         )
         return f"待发送邮件：\n{self._pending_sends[str(event.get_sender_id())].summary}\n\n确认无误请发送：邮箱 确认\n取消请发送：邮箱 取消"
 
-    async def _confirm_send(self, event: AstrMessageEvent) -> str:
+    async def _confirm_send(
+        self,
+        event: AstrMessageEvent,
+        *,
+        require_explicit_confirmation: bool = False,
+    ) -> str:
         sender_id = str(event.get_sender_id())
         pending = self._pending_sends.get(sender_id)
         if pending is None:
             return "没有待确认的邮件。"
+        if pending.source_event_id == id(event):
+            return "邮件已生成待发送项。必须等待管理员下一条消息明确确认，当前不会发送。"
+        if require_explicit_confirmation and not self._has_explicit_confirmation(
+            event.get_message_str()
+        ):
+            return "未检测到明确发送确认。请在下一条消息单独回复“确认发送”或使用“邮箱 确认”。"
         if monotonic() >= pending.expires_at:
             self._pending_sends.pop(sender_id, None)
             return "确认已过期，请重新发起发送。"
@@ -255,6 +268,23 @@ class AgentMailPlugin(Star):
             return result["error"]
         self._pending_sends.pop(sender_id, None)
         return "邮件已提交发送。"
+
+    @staticmethod
+    def _has_explicit_confirmation(message: str) -> bool:
+        normalized = re.sub(r"[\s，。！？!,.]+", "", message).lower()
+        return normalized in {
+            "确认",
+            "确认发送",
+            "确认无误发送",
+            "确定发送",
+            "同意发送",
+            "现在发送",
+            "立即发送",
+            "发吧",
+            "发送吧",
+            "邮箱确认",
+            "邮件确认",
+        }
 
     async def _run_cli(self, *args: str) -> dict[str, Any]:
         try:
